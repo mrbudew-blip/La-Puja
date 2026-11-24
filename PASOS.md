@@ -1,12 +1,12 @@
 # La Puja: lo que tienes que hacer tú
 
-El juego está **terminado y probado en tu PC** (partidas completas con bots, en móvil y en PC). Lo que no puedo hacer por ti es **ponerlo en internet**: hace falta una cuenta tuya en un servicio de alojamiento. Aquí van los pasos, de más fácil a más serio.
+El juego está **terminado y probado** (partidas completas con bots, en móvil y en PC) y **se puede jugar online desde tu PC** con un solo comando (sección 2), gratis y sin cuentas. Lo único que no puedo hacer por ti es dejarlo en internet sin depender de tu PC (sección 3): para eso hace falta una cuenta tuya en un servicio de alojamiento.
 
 ---
 
 ## 1. Jugarlo en tu PC (2 minutos)
 
-Abre una terminal en la carpeta `La puja` y ejecuta:
+Abre una terminal en la carpeta del juego y ejecuta:
 
 ```powershell
 npm install
@@ -47,27 +47,40 @@ npm run bots -- --sola 4
 
 ---
 
-## 2. Jugar con tus amigos desde sus casas esta noche (5 minutos, gratis)
+## 2. Jugar online con tus amigos desde sus casas (gratis, desde tu PC)
 
-Tu PC hace de servidor y un **túnel de Cloudflare** le da una dirección pública. Mientras tu PC y la terminal estén abiertos, funciona.
+Tu PC hace de servidor y un **túnel de Cloudflare** le da una dirección pública. Sin cuentas, sin pagar y sin tocar el router. La partida existe **mientras tu PC y la ventana del juego estén encendidos**.
 
-1. Instala `cloudflared` (no hace falta cuenta):
+### Una sola vez: instalar `cloudflared`
+
+Es el programa que hace el túnel. **En tu PC ya está instalado.** En otro PC:
+
+```powershell
+winget install --id Cloudflare.cloudflared
+```
+
+### Cada vez que queráis jugar
+
+1. Haz **doble clic en `Jugar online.cmd`**, en la carpeta del juego. O, en una terminal:
 
    ```powershell
-   winget install --id Cloudflare.cloudflared
+   npm run online
    ```
 
-   Cierra y vuelve a abrir la terminal después de instalarlo.
+2. En unos 10 segundos sale el enlace, tipo `https://palabras-raras.trycloudflare.com`. Se copia solo al portapapeles y se abre en tu navegador.
+3. Crea la sala **desde ese enlace**, no desde `localhost`, y pasa el enlace de la sala por Discord o WhatsApp.
+4. Deja la ventana abierta y el PC encendido. Mientras está en marcha, Windows no se suspende solo, pero si cierras la tapa del portátil, sí.
+5. Para acabar: `Ctrl + C` o cierra la ventana.
 
-2. Con `npm start` funcionando en una terminal, en **otra** ejecuta:
+### Lo que tienes que saber
 
-   ```powershell
-   cloudflared tunnel --url http://localhost:3000
-   ```
-
-3. Saldrá una dirección tipo `https://palabras-raras.trycloudflare.com`. Ábrela, crea la sala y pasa el enlace de la sala por WhatsApp o Discord.
-
-> La dirección cambia cada vez que lanzas el túnel. Si apagas el PC, se acaba la partida.
+- **El enlace cambia cada vez que lo enciendes.** Si lo reinicias a mitad de partida, todos pierden su sitio: cread una sala nueva.
+- Si se cae el servidor o el túnel, se apaga todo y la ventana dice por qué.
+- Desde fuera **solo se entra por el túnel**: el servidor no atiende directamente a nadie de tu red ni de internet.
+- Como mucho hay **20 salas a la vez**, para que nadie con el enlace te llene la memoria del PC.
+- Si dice que **el puerto 3000 está en uso**, tienes `npm start` u otra ventana del juego abierta: ciérrala.
+- Los túneles sin cuenta de Cloudflare no tienen garantía, pero para 3–8 amigos van sobrados.
+- Si algo falla, `npm run online -- --detalle` enseña todo lo que dice `cloudflared`.
 
 ---
 

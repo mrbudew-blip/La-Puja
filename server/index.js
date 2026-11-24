@@ -11,7 +11,11 @@ const { cargarCartas } = require('./cartas');
 const { crearLimitador } = require('./limite');
 
 const PUERTO = Number(process.env.PORT) || 3000;
+// HOST=127.0.0.1 hace que solo se pueda entrar desde este PC (o por el túnel de `npm run online`).
+const HOST = process.env.HOST || undefined;
 const INACTIVIDAD_MAX = 30 * 60 * 1000; // salas vacías se borran a los 30 min
+const MAX_SALAS = 20; // salas abiertas a la vez: que nadie con el enlace llene la memoria del PC
+const INACTIVIDAD_SI_LLENO = 5 * 60 * 1000; // si se llega al máximo, se borran antes las vacías
 const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sin I ni O para no confundir
 
 const cartas = cargarCartas();
@@ -56,7 +60,22 @@ function crearSala() {
   return info;
 }
 
+// Borra las salas sin nadie conectado que llevan más de `inactividadMs` sin moverse.
+function limpiarSalas(inactividadMs) {
+  const ahora = Date.now();
+  for (const [codigo, info] of salas) {
+    if (info.sockets.size === 0 && ahora - info.sala.ultimaActividad > inactividadMs) {
+      info.sala.destruir();
+      salas.delete(codigo);
+    }
+  }
+}
+
 app.post('/api/salas', (_req, res) => {
+  if (salas.size >= MAX_SALAS) limpiarSalas(INACTIVIDAD_SI_LLENO);
+  if (salas.size >= MAX_SALAS) {
+    return res.status(503).json({ error: `Ya hay ${MAX_SALAS} salas abiertas, que es el máximo. Prueba en unos minutos.` });
+  }
   const { sala } = crearSala();
   res.json({ codigo: sala.codigo });
 });
@@ -175,15 +194,7 @@ io.on('connection', (socket) => {
 });
 
 // Limpieza de salas abandonadas
-setInterval(() => {
-  const ahora = Date.now();
-  for (const [codigo, info] of salas) {
-    if (info.sockets.size === 0 && ahora - info.sala.ultimaActividad > INACTIVIDAD_MAX) {
-      info.sala.destruir();
-      salas.delete(codigo);
-    }
-  }
-}, 5 * 60 * 1000).unref();
+setInterval(() => limpiarSalas(INACTIVIDAD_MAX), 5 * 60 * 1000).unref();
 
 function ipsLocales() {
   return Object.values(os.networkInterfaces())
@@ -192,9 +203,9 @@ function ipsLocales() {
     .map((i) => i.address);
 }
 
-servidor.listen(PUERTO, () => {
+servidor.listen(PUERTO, HOST, () => {
   console.log(`\n🔨 La Puja está en marcha`);
   console.log(`   En este PC:          http://localhost:${PUERTO}`);
-  for (const ip of ipsLocales()) console.log(`   Desde tu móvil (wifi): http://${ip}:${PUERTO}`);
+  if (!HOST) for (const ip of ipsLocales()) console.log(`   Desde tu móvil (wifi): http://${ip}:${PUERTO}`);
   console.log('');
 });

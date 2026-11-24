@@ -911,14 +911,16 @@
 
   async function crearSala(boton) {
     boton.disabled = true;
+    let motivo = '';
     try {
       const r = await fetch('/api/salas', { method: 'POST' });
-      if (!r.ok) throw new Error();
-      const { codigo: nuevo } = await r.json();
-      location.href = `/sala/${nuevo}`;
+      const datos = await r.json().catch(() => ({}));
+      motivo = datos.error || '';
+      if (!r.ok || !datos.codigo) throw new Error();
+      location.href = `/sala/${datos.codigo}`;
     } catch {
       boton.disabled = false;
-      toast('No se ha podido crear la sala. ¿Está el servidor encendido?', 'error');
+      toast(motivo || 'No se ha podido crear la sala. ¿Está el servidor encendido?', 'error');
     }
   }
 

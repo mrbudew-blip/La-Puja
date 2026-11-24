@@ -5,7 +5,7 @@ Juego de fiesta online para grupos de amigos españoles: se subastan cartas con 
 ## Cómo está hecho
 - `server/juego.js`: todas las reglas (clase `Sala`). Sin sockets ni temporizadores reales: recibe `programar(ms, fn)` y `ahora()` para poder testear. `CONFIG` arriba del todo tiene los números del juego.
 - `server/cartas.js`: carga los mazos y rellena `{nombre}` / `{nombre2}`.
-- `server/index.js`: Express + Socket.IO. Una sala por código, estado en memoria. Cada cambio envía a cada jugador su `vista` personalizada.
+- `server/index.js`: Express + Socket.IO. Una sala por código, estado en memoria. Cada cambio envía a cada jugador su `vista` personalizada. Máximo 20 salas a la vez (`MAX_SALAS`); `HOST` elige la interfaz en la que escucha.
 - `public/`: HTML + CSS + JS sin framework. `app.js` repinta todo con `innerHTML` en cada estado; **todo texto de usuario pasa por `esc()`**.
 - `cartas/*.json`: mazos editables. Preguntas acaban en `?`, inicios en `...`, finales empiezan por `...`.
 - `server/limite.js`: límite de 5 acciones por segundo por jugador.
@@ -22,6 +22,7 @@ Juego de fiesta online para grupos de amigos españoles: se subastan cartas con 
 ## Comandos
 - `npm start`: servidor en http://localhost:3000 (`PORT` para cambiarlo).
 - `npm run dev`: igual, reiniciando al guardar.
+- `npm run online` (o doble clic en `Jugar online.cmd`): servidor + túnel rápido de Cloudflare (`scripts/online.js`). Así se juega con amigos: el PC del usuario es el servidor, gratis y sin cuentas. Arranca el servidor con `HOST=127.0.0.1` (solo se entra por el túnel), copia y abre el enlace `*.trycloudflare.com` e impide que Windows se suspenda. Si cae el servidor o el túnel, se apaga todo.
 - `npm test`: tests de reglas y de mazos (node:test).
 - `LAPUJA_RAPIDO=1`: acorta los tiempos de subasta para probar con bots.
 
