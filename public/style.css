@@ -1142,6 +1142,20 @@ select:focus-visible {
   text-align: right;
 }
 
+/* En móvil, con Gastado y Hacienda hay hasta 6 columnas: más compacta para que quepan. */
+@media (max-width: 480px) {
+  .tabla {
+    font-size: 0.8rem;
+  }
+  .tabla th {
+    font-size: 0.72rem;
+  }
+  .tabla th,
+  .tabla td {
+    padding: 0.4rem 0.12rem;
+  }
+}
+
 .fila-ganador td {
   font-weight: 800;
 }

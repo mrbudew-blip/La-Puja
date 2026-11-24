@@ -1,7 +1,7 @@
 {
   "name": "la-puja",
   "version": "1.0.0",
-  "description": "Juego de fiesta online: subasta cartas con pelas y suelta la barbaridad más grande.",
+  "description": "Juego de Cartas online: subasta cartas e invéntate la barbaridad más grande.",
   "main": "server/index.js",
   "type": "commonjs",
   "private": true,

@@ -224,6 +224,21 @@ test('multa con salida ≤ 15: 15 × jugadores sin carta a cada uno', () => {
   assert.equal(sala.jugadores.get(js[1].id).pelas, 140 - 45);
 });
 
+test('resultados: cada jugador ve lo gastado en la ronda (carta + multas)', () => {
+  const { sala, reloj, js } = montar(3, 100);
+  sala.empezar(js[0].id);
+  reloj.avanzar(CONFIG.T_SIN_PUJAS); // nadie puja: 15 × 3 = 45 a cada uno
+  sala.pujar(js[0].id, 10); // salida 1 + 10
+  reloj.avanzar(CONFIG.T_PUJA);
+  repartirCartas(sala, reloj, js.slice(1));
+  for (const j of js) sala.responder(j.id, `respuesta de ${j.apodo}`);
+  while (sala.fase === 'lectura') sala.avanzar(sala.modId, 1);
+  for (const j of js) sala.votar(j.id, js.filter((o) => o.id !== j.id).map((o) => o.id).slice(0, sala.requeridos(j.id)));
+  assert.equal(sala.fase, 'resultados');
+  const gasto = Object.fromEntries(sala.vista(js[0].id).resultados.map((r) => [r.id, r.gastado]));
+  assert.deepEqual(gasto, { [js[0].id]: 45 + 11, [js[1].id]: 45 + 1, [js[2].id]: 45 + 1 });
+});
+
 test('multa con salida > 15: salida × jugadores sin carta (callarse nunca sale más barato)', () => {
   const { sala, reloj, js } = montar(4, 150, { pujaMinPct: 20 }); // salida 30
   sala.empezar(js[0].id);

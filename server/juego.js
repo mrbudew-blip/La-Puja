@@ -407,6 +407,7 @@ class Sala {
     this.resultados = null;
     this.hacienda = null;
     this.limiteEscribir = 0;
+    this.gastos = new Map(); // id -> pelas gastadas esta ronda (carta + multas)
     this.mediaSalida = media(this.activos());
     this.precioSalida = this.calcularPrecioSalida();
     this.subasta = { carta: null, puja: null, modo: 'espera', limite: 0, ganadas: [], silencios: 0 };
@@ -466,6 +467,7 @@ class Sala {
     const s = this.subasta;
     const j = this.jugadores.get(s.puja.id);
     j.pelas -= s.puja.cantidad;
+    this._apuntarGasto(j.id, s.puja.cantidad);
     const entrada = { id: j.id, carta: s.carta, precio: s.puja.cantidad, texto: null, borrador: '', listo: false, fantasma: false };
     this.entradas.set(j.id, entrada);
     s.ganadas.push({ id: j.id, carta: s.carta, precio: s.puja.cantidad });
@@ -474,12 +476,17 @@ class Sala {
     this._siguienteCartaOFin();
   }
 
+  _apuntarGasto(id, cantidad) {
+    this.gastos.set(id, (this.gastos.get(id) || 0) + cantidad);
+  }
+
   _penalizar() {
     const sinCarta = this._sinCarta();
     const multiplicador = this.multiplicadorMulta();
     const multa = this.multaPorJugador();
     const muertos = [];
     for (const j of sinCarta) {
+      this._apuntarGasto(j.id, Math.min(j.pelas, multa));
       j.pelas = Math.max(0, j.pelas - multa);
       if (j.pelas === 0) {
         j.fantasma = true;
@@ -668,7 +675,14 @@ class Sala {
     this.resultados = [...puntos.entries()]
       .map(([id, p]) => {
         const e = this.entradas.get(id);
-        return { id, puntos: p, pelas: p * CONFIG.PELAS_POR_PUNTO, carta: e.carta, texto: e.texto };
+        return {
+          id,
+          puntos: p,
+          pelas: p * CONFIG.PELAS_POR_PUNTO,
+          gastado: this.gastos.get(id) || 0,
+          carta: e.carta,
+          texto: e.texto,
+        };
       })
       .sort((a, b) => b.puntos - a.puntos);
     for (const r of this.resultados) this.jugadores.get(r.id).pelas += r.pelas;

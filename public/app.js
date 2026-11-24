@@ -799,7 +799,8 @@
     const tabla = v.resultados
       .map((r) => {
         const paga = pagoDe(r.id);
-        return `<tr><td>${esc(apodo(v, r.id))}</td><td>${r.puntos}</td><td class="oro">+${pelas(r.pelas)}</td>${
+        const gastado = r.gastado || 0;
+        return `<tr><td>${esc(apodo(v, r.id))}</td><td class="rojo">${gastado ? `−${pelas(gastado)}` : pelas(0)}</td><td>${r.puntos}</td><td class="oro">+${pelas(r.pelas)}</td>${
           cobrado ? `<td class="rojo">${paga ? `−${pelas(paga)}` : ''}</td>` : ''
         }<td>${pelas(jugador(v, r.id).pelas)}</td></tr>`;
       })
@@ -834,7 +835,7 @@
       <section class="bloque">
         <h2>Puntos de la ronda</h2>
         <table class="tabla">
-          <thead><tr><th>Jugador</th><th>Puntos</th><th>Gana</th>${cobrado ? '<th>Hacienda</th>' : ''}<th>Total</th></tr></thead>
+          <thead><tr><th>Jugador</th><th title="Lo que pagó por su carta más las multas de esta ronda">Gastado</th><th>Puntos</th><th>Gana</th>${cobrado ? '<th>Hacienda</th>' : ''}<th>Total</th></tr></thead>
           <tbody>${tabla}</tbody>
         </table>
         ${textoHacienda ? `<p class="hacienda">${textoHacienda}</p>` : ''}
